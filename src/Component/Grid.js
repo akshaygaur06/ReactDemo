@@ -1,7 +1,6 @@
 import React, { useEffect ,useState }  from 'react'; 
 import { forwardRef } from 'react';
 import { EmployeeService } from "../Services/EmployeeService";
-import Button from '@material-ui/core/Button';
 import MaterialTable from 'material-table';
 import { AddBox,ArrowDownward,Check,ChevronLeft,ChevronRight,
     Clear,DeleteOutline,Edit,FilterList,FirstPage,LastPage,Remove,SaveAlt,Search,ViewColumn } from "@material-ui/icons";
@@ -28,6 +27,7 @@ const tableIcons = {
 
 
 const ListEmployee =props=> {
+    const [selected,setSelected]=useState();
    const[employees,setEmployees]= useState([])
     useEffect(()=>{  
         getEmployeeList()
@@ -40,12 +40,15 @@ const ListEmployee =props=> {
             });
     }
 
-    const deleteEmployee=(id)=> {
-        EmployeeService.deleteEmployee(id)
-            .then(res => {
-               
-               getEmployeeList();
-            })
+    const deleteEmployee=()=> {
+   
+        EmployeeService.deleteEmployee(selected)
+        .then(res => { 
+        getEmployeeList()
+      })
+       
+
+            
     }
 
     const editEmployee =(id)=> {
@@ -61,9 +64,7 @@ const ListEmployee =props=> {
    
         return (
             <div>
-                <Button variant="contained" color="primary" style={style} onClick={addEmployee}>
-                    Add Employee
-        </Button>
+              
                 <div style={{ maxWidth: "100%" }}>
                     <MaterialTable
                       icons={tableIcons}
@@ -74,30 +75,50 @@ const ListEmployee =props=> {
                             { title: 'Position', field: 'position' }
                         ]}
                         data={employees}
-                        title="Employee Details"
+                        title=""
                         actions={[
+                            {
+                                icon: () =>  { return <AddBox/> },
+                                tooltip: 'Add Employee',
+                                isFreeAction: true,
+                                onClick: (event) => {
+                                    addEmployee(); 
+                                }
+                              },
+                            {
+                                icon: () => { return <DeleteOutline/> },
+                                tooltip: 'Delete All ',
+                                onClick: (event, rowData) =>{
+                                    debugger;
+                                    deleteEmployee()
+                                 }
+                              },
                             {
                               icon: () => { return <Edit/> },
                               tooltip: 'Edit ',
+                             position:'row',
                               onClick: (event, rowData) =>{
                                
                                 editEmployee(rowData.employeeId);
                                }
-                            },
-                            rowData => ({
-                            icon: () => { return <DeleteOutline/> },
-                              tooltip: 'Delete',
-                              onClick: (event, rowData) =>{
-                               
-                                deleteEmployee(rowData.employeeId);
-                               }                            
-                              
-                            })
+                            }
                           ]}
                           options={{
                             exportButton: true,
-                            actionsColumnIndex: -1
+                            actionsColumnIndex: -1,
+                            resizable:true,
+                            selection:true
+
                           }}
+                          onSelectionChange={(rows) =>{
+                           const selectValue=rows.map((row)=>{
+                                return row.employeeId
+
+                            })
+
+                            setSelected(selectValue.toString())
+                           debugger
+                          } }
                          
                     />
                 </div>
@@ -107,11 +128,5 @@ const ListEmployee =props=> {
 
 
 
-const style = {
-    display: 'flex',
-    justifyContent: 'center',
-    marginTop: '50px',
-    marginBottom: '50px'
-}
 
 export default ListEmployee;

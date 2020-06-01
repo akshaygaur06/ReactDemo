@@ -2,29 +2,39 @@ import React, { useState ,useEffect} from 'react'
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
+import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import {ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import {EmployeeService} from '../../Services/EmployeeService';
+
 
 const Edit =props => {
     useEffect(() => {
       
         BindEmployeeData()
       },[]);
-    const [emps,setEmps]=useState({
+    
+      
+      const [emps,setEmps]=useState({
         employeeId:'',
-        name:'',
+        fullName:'',
         empcode:'',
         mobile:'',
         position:''
     
           })
+
+          const [valid,setValid]=useState({
+          isRequired:false
+          })
+
+        
     const {employeeId, fullName,empcode,mobile,position}=emps
+   
     const back=()=>{
-        props.history.push('/List');
+        props.history.push('/list');
       }
      const BindEmployeeData =()=> {
-         debugger
+        
         EmployeeService.fetchEmployeeById(window.localStorage.getItem("employeeId"))
             .then((res) => {
                 let employee = res.data;
@@ -32,7 +42,7 @@ const Edit =props => {
                 setEmps({employeeId, fullName,empcode,mobile,position})
                
             }, error => {
-                debugger
+               
                 return error;
               });
     }
@@ -41,12 +51,18 @@ const Edit =props => {
     
      const onChange=(e)=>{
             setEmps({...emps,...{[e.target.name]: e.target.value }})
-            back()
+        
      }
 
         
     const submitHandler=(e)=>{
-            e.preventDefault();
+        e.preventDefault();
+    if(fullName==='' || empcode===''||  mobile==='' || position ===''){
+        setValid({isRequired:true})      
+        return false
+}
+      
+      
             let employee = {employeeId, fullName,  empcode,  mobile,  position};
             EmployeeService.editEmployee(employee)
                 .then(res => {            
@@ -59,37 +75,38 @@ const Edit =props => {
     return (
         <Container component="main" maxWidth="xs">
         <Typography component="h1" variant="h5">
-        Edit
+        Edit 
         </Typography>
-        <ValidatorForm onSubmit={submitHandler} >
-        <TextValidator type="text" variant="outlined" label="Employee Code" fullWidth margin="normal" name="empcode" value={empcode} onChange={onChange} validators={['required']} errorMessages={['Employee Code is required']}/>
+   <form>
+        <TextField type="text" error={( empcode==='' && valid.isRequired )}  variant="outlined" label="Employee Code" fullWidth margin="normal" name="empcode" value={empcode} onChange={onChange} />
 
-                <TextValidator type="text" variant="outlined" label="Full Name"  fullWidth margin="normal" name="fullName" value={fullName} onChange={onChange} validators={['required']} errorMessages={['Full Name is required']}/>
+                <TextField type="text" error={( fullName==='' && valid.isRequired )} variant="outlined" label="Full Name"  fullWidth margin="normal" name="fullName" value={fullName} onChange={onChange} />
 
              
-                <TextValidator label="Mobile" variant="outlined" fullWidth margin="normal" name="mobile" value={mobile} onChange={onChange} validators={['required','mobileValidation']} errorMessages={['Mobile is required','Mobile number must be of 10 digits']}/>
+                <TextField label="Mobile" error={( mobile==='' && valid.isRequired )}  variant="outlined" fullWidth margin="normal" name="mobile" value={mobile} onChange={onChange}  inputProps={{ maxLength: 10
+  }}/>
 
-                <TextValidator label="Designation"  variant="outlined"  fullWidth margin="normal" name="position" value={position} onChange={onChange} validators={['required']} errorMessages={['Designation is required']}/>
+                <TextField label="Designation"  error={( position==='' && valid.isRequired )} variant="outlined"  fullWidth margin="normal" name="position" value={position} onChange={onChange} />
                 <Grid container>
                     <Grid item xs>
                     <Button
-                 type="submit"
+                   type="submit"
                  fullWidth
                  variant="contained"
                  color="primary"
-                 
+                 onClick={submitHandler}
              >Submit</Button>
                     </Grid>
                     <Grid item xs>
                     <Button                 
                     fullWidth
+                    onClick={back}
                     variant="contained"
              >Cancel</Button>
                     </Grid>
                 </Grid>
                
- 
-</ValidatorForm>
+                </form>
 </Container>
     )
 }

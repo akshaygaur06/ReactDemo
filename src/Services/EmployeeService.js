@@ -14,6 +14,9 @@ const fetchEmployeeById = (id) => {
         axios.get(`${extUrl}/Employee/GetEmployeeById/${id}` , { headers: { 'Content-Type': 'application/json' } })
             .then(result => {  
                 return result;
+            },
+            error => {
+                return error;
             })
     );
 }
@@ -41,12 +44,13 @@ const editEmployee = async (employee) => {
                 })
     );
 }
-const deleteEmployee = async (id) => {    
+const deleteEmployee = async (ids) => {    
     return (
-      await  axios.delete(`${extUrl}/Employee/DeleteEmployee/${id}`, { headers: { 'Content-Type': 'application/json' } })
+      await  axios.delete(`${extUrl}/Employee/DeleteEmployees?employeeIdsString= ${ids}`, { headers: { 'Content-Type': 'application/json' } })
             .then(result => {  
                 return result;
-            })
+            },
+              )
     );
 }
 
